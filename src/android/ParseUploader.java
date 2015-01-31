@@ -35,8 +35,9 @@ public class ParseUploader extends CordovaPlugin {
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
 		if (action.equals("upload")) {
 			String fileURI = args.getString(0);
+			double megapixels = args.getDouble(1);
 			try {
-				this.upload(fileURI, callbackContext);
+				this.upload(fileURI, megapixels, callbackContext);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -46,7 +47,7 @@ public class ParseUploader extends CordovaPlugin {
 		return false;
 	}
 
-	private void upload(String fileURI, final CallbackContext callbackContext) throws IOException {
+	private void upload(String fileURI, double megapixels, final CallbackContext callbackContext) throws IOException {
 		if (fileURI != null && fileURI.length() > 0) {
 			//reading the file into a byte array
 
@@ -63,7 +64,7 @@ public class ParseUploader extends CordovaPlugin {
 			//   bos.write(b, 0, bytesRead);
 			//}
 			
-			ByteArrayOutputStream bos = getBitmap(uri);
+			ByteArrayOutputStream bos = getBitmap(uri, megapixels);
 			byte[] fileBytes = bos.toByteArray();
 			
 			String fileName = uri.getLastPathSegment();
@@ -90,14 +91,21 @@ public class ParseUploader extends CordovaPlugin {
 		}
 	}
 	
-	private ByteArrayOutputStream getBitmap(Uri uri) throws FileNotFoundException {
+	/**
+	 * 
+	 * @param uri
+	 * @param megapixels how many megapixels you want the image to be as a decimal e.g. 1.2 for 1.2 megapixels
+	 * @return
+	 * @throws FileNotFoundException
+	 */
+	private ByteArrayOutputStream getBitmap(Uri uri, double megapixels) throws FileNotFoundException {
 
 		ContentResolver cr = cordova.getActivity().getContentResolver();
 		InputStream is = cr.openInputStream(uri);
 		
 		InputStream in = null;
 		try {
-		    final int IMAGE_MAX_SIZE = 480000; // 0.480 MP
+		    final int IMAGE_MAX_SIZE = (new Double(megapixels * 1000000)).intValue();
 		    in = cr.openInputStream(uri);
 
 		    // Decode image size
