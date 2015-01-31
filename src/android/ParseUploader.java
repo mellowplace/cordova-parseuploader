@@ -36,8 +36,9 @@ public class ParseUploader extends CordovaPlugin {
 		if (action.equals("upload")) {
 			String fileURI = args.getString(0);
 			double megapixels = args.getDouble(1);
+			int quality = args.getInt(2);
 			try {
-				this.upload(fileURI, megapixels, callbackContext);
+				this.upload(fileURI, megapixels, quality, callbackContext);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -47,7 +48,7 @@ public class ParseUploader extends CordovaPlugin {
 		return false;
 	}
 
-	private void upload(String fileURI, double megapixels, final CallbackContext callbackContext) throws IOException {
+	private void upload(String fileURI, double megapixels, int quality, final CallbackContext callbackContext) throws IOException {
 		if (fileURI != null && fileURI.length() > 0) {
 			//reading the file into a byte array
 
@@ -64,7 +65,7 @@ public class ParseUploader extends CordovaPlugin {
 			//   bos.write(b, 0, bytesRead);
 			//}
 			
-			ByteArrayOutputStream bos = getBitmap(uri, megapixels);
+			ByteArrayOutputStream bos = getBitmap(uri, megapixels, quality);
 			byte[] fileBytes = bos.toByteArray();
 			
 			String fileName = uri.getLastPathSegment();
@@ -95,10 +96,11 @@ public class ParseUploader extends CordovaPlugin {
 	 * 
 	 * @param uri
 	 * @param megapixels how many megapixels you want the image to be as a decimal e.g. 1.2 for 1.2 megapixels
+	 * @param quality 0-100 (0 smallest, 100 best)
 	 * @return
 	 * @throws FileNotFoundException
 	 */
-	private ByteArrayOutputStream getBitmap(Uri uri, double megapixels) throws FileNotFoundException {
+	private ByteArrayOutputStream getBitmap(Uri uri, double megapixels, int quality) throws FileNotFoundException {
 
 		ContentResolver cr = cordova.getActivity().getContentResolver();
 		InputStream is = cr.openInputStream(uri);
@@ -153,7 +155,7 @@ public class ParseUploader extends CordovaPlugin {
 
 		    Log.d(TAG, "bitmap size - width: " +b.getWidth() + ", height: " + b.getHeight());
 		    ByteArrayOutputStream out = new ByteArrayOutputStream();
-		    b.compress(Bitmap.CompressFormat.JPEG, 80, out); 
+		    b.compress(Bitmap.CompressFormat.JPEG, quality, out); 
 		    return out;
 		} catch (IOException e) {
 		    Log.e(TAG, e.getMessage(),e);
